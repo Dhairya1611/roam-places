@@ -1,0 +1,30 @@
+name: Bootstrap committed source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - roam-source.tar.gz
+      - .github/workflows/bootstrap2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    if: github.actor == 'Dhairya1611'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore exact local commit
+        run: |
+          if [ ! -f roam-source.tar.gz ]; then exit 0; fi
+          mkdir -p /tmp/roam-source
+          tar -xzf roam-source.tar.gz -C /tmp/roam-source
+          rsync -a --exclude='.github/workflows/' /tmp/roam-source/ ./
+          rm roam-source.tar.gz
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Publish complete Roam source"
+          git push
